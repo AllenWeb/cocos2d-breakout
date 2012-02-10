@@ -1,80 +1,92 @@
 // Import the cocos2d module
-var cocos = require('cocos2d'),
-// Import the geometry module
-    geom = require('geometry'),
-    Bat = require('Bat'),
-    Ball = require('Ball');
+var cocos  = require('cocos2d')
+  , events = require('events')
+  , geom   = require('geometry')
+  , Bat    = require('/Bat')
+  , Ball   = require('/Ball')
 
-// Create a new layer
-var Breakout = cocos.nodes.Layer.extend({
-    bat: null, 
+
+function Breakout () {
+    // You must always call the super class version of init
+    Breakout.superclass.constructor.call(this)
+
+    this.isMouseEnabled = true
+
+    // Get size of canvas
+    var s = cocos.Director.sharedDirector.winSize
+
+
+    // Add Bat
+    var bat = new Bat()
+    bat.position = new geom.Point(160, s.height - 280)
+    this.addChild(bat)
+    this.bat = bat
+
+
+    // Add Ball
+    var ball = new Ball()
+    ball.position = new geom.Point(140, s.height - 210)
+    this.addChild(ball)
+    this.ball = ball
+
+
+    // Add Map
+    var map = new cocos.nodes.TMXTiledMap({file: '/resources/level1.tmx'})
+    map.position = new geom.Point(0, s.height - map.contentSize.height)
+    this.addChild(map)
+    this.map = map
+}
+
+Breakout.inherit(cocos.nodes.Layer, {
+    bat: null,
     ball: null,
 
-    init: function() {
-        // You must always call the super class version of init
-        Breakout.superclass.init.call(this);
+    mouseMoved: function (evt) {
+        var bat = this.bat
 
-        this.set('isMouseEnabled', true);
-
-        // Get size of canvas
-        var s = cocos.Director.get('sharedDirector').get('winSize');
-
-
-        // Add Bat
-        var bat = Bat.create();
-        bat.set('position', new geom.Point(160, 280));
-        this.addChild({child: bat});
-        this.set('bat', bat);
-
-
-        // Add Ball
-        var ball = Ball.create();
-        ball.set('position', new geom.Point(140, 210));
-        this.addChild({child: ball});
-        this.set('ball', ball);
-
-
-        // Add Map
-        var map = cocos.nodes.TMXTiledMap.create({file: '/resources/level1.tmx'});
-        map.set('position', new geom.Point(0, 0));
-        this.addChild({child: map});
-        this.set('map', map);
+        var batPos = bat.position
+        batPos.x = evt.locationInCanvas.x
+        bat.position = batPos
     },
 
-    mouseMoved: function(evt) {
-        var bat = this.get('bat');
- 
-        var batPos = bat.get('position');
-        batPos.x = evt.locationInCanvas.x;
-        bat.set('position', batPos);
-    },
-
-    restart: function() {
-        var director = cocos.Director.get('sharedDirector');
+    restart: function () {
+        var director = cocos.Director.sharedDirector
 
         // Create a scene
-        var scene = cocos.nodes.Scene.create();
+        var scene = new cocos.nodes.Scene()
 
         // Add our layer to the scene
-        scene.addChild({child: Breakout.create()});
+        scene.addChild(new Breakout())
 
-        director.replaceScene(scene);
+        director.replaceScene(scene)
     }
-});
+})
 
-// Initialise everything
+/**
+ * Entry point for the application
+ */
+function main () {
+    // Initialise application
 
-// Get director
-var director = cocos.Director.get('sharedDirector');
+    // Get director singleton
+    var director = cocos.Director.sharedDirector
 
-// Attach director to our <div> element
-director.attachInView(document.getElementById('breakout-demo'));
+    // Wait for the director to finish preloading our assets
+    events.addListener(director, 'ready', function (director) {
+        // Create a scene and layer
+        var scene = new cocos.nodes.Scene()
+          , layer = new Breakout()
 
-// Create a scene
-var scene = cocos.nodes.Scene.create();
+        // Add our layer to the scene
+        scene.addChild(layer)
 
-// Add our layer to the scene
-scene.addChild({child: Breakout.create()});
+        // Run the scene
+        director.replaceScene(scene)
+    })
 
-// Run the scene
-director.runWithScene(scene);
+    // Preload our assets
+    director.runPreloadScene()
+}
+
+
+exports.main = main

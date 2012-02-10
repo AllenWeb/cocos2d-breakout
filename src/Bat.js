@@ -1,19 +1,19 @@
-var cocos = require('cocos2d'),
-    geom = require('geometry');
+var cocos = require('cocos2d')
+  , geom  = require('geometry')
 
-var Bat = cocos.nodes.Node.extend({
-    init: function() {
-        Bat.superclass.init.call(this);
+function Bat () {
+    Bat.superclass.constructor.call(this)
 
-        var sprite = cocos.nodes.Sprite.create({
-                         file: '/resources/sprites.png',
-                         rect: new geom.Rect(0, 0, 64, 16)
-                     });
+    var sprite = new cocos.nodes.Sprite({
+                     file: '/resources/sprites.png',
+                     rect: new geom.Rect(0, 0, 64, 16)
+                 })
 
-        sprite.set('anchorPoint', new geom.Point(0, 0));
-        this.addChild({child: sprite});
-        this.set('contentSize', sprite.get('contentSize'));
-    }
-});
+    sprite.anchorPoint = new geom.Point(0, 0)
+    this.addChild({child: sprite})
+    this.contentSize = sprite.contentSize
+}
 
-module.exports = Bat;
+Bat.inherit(cocos.nodes.Node)
+
+module.exports = Bat
